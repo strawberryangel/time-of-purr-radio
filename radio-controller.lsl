@@ -75,7 +75,7 @@
 #define NO_TITLE_INFO "(no title info available)"
 
 // not used currently - for showing info on current song title elsewhere in the region
-integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
+// integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
 
 // Buttons
 
@@ -146,14 +146,15 @@ retrieve_titelinfo()
 display_line(string line, string message)
 {
     // Setup XYtext Variables
-    integer DISPLAY_STRING      = 204000;
-//    integer DISPLAY_EXTENDED    = 204001;     (not used)
-//    integer REMAP_INDICES       = 204002;     (not used)
-//    integer RESET_INDICES       = 204003;     (not used)
-//    integer SET_CELL_INFO       = 204004;     (not used)
-//    integer SET_FONT_TEXTURE    = 204005;     (not used)
-//    integer SET_THICKNESS       = 204006;     (not used)
-//    integer SET_COLOR           = 204007;     (not used)
+    #define DISPLAY_STRING      204000
+// Not Used
+//    #define DISPLAY_EXTENDED    204001
+//    #define REMAP_INDICES       204002
+//    #define RESET_INDICES       204003
+//    #define SET_CELL_INFO       204004
+//    #define SET_FONT_TEXTURE    204005
+//    #define SET_THICKNESS       204006
+//    #define SET_COLOR           204007
 
     llMessageLinked(LINK_SET,DISPLAY_STRING,message,line);
 }
@@ -258,6 +259,7 @@ integer stations_in_category(integer cat)
 }
 
 // Not used currently -- to fix button placement
+/*
 list order_buttons(list buttons)
 {
     integer offset;
@@ -277,6 +279,7 @@ list order_buttons(list buttons)
 
     return fixt;
 }
+*/
 
 // Returns a list of station names in a certain category (genre)
 list station_list(integer category)
@@ -380,6 +383,10 @@ integer check_url(string url)
         pos=8;
 
     if (pos==0)   return FALSE;
+
+    return TRUE;
+    // This extra checking is not valid.
+    // It rejects valid addresses that don't follow this form..
 
     string str_ip_port=llGetSubString(url,pos,-1);
     list list_ip_port=llParseString2List(str_ip_port,[":"],[]);                 // split in ip-adress and port
