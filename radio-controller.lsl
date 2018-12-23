@@ -1,3 +1,5 @@
+#include "lib/dialog.lsl"
+
 // Script:  Shoutcast - radio controller
 // Version: 0.3 - released 10-2-2011
 // Logic Scripts (Flennan Roffo)
@@ -145,6 +147,7 @@ retrieve_titelinfo()
 // Display a line on an Xytext device linked in
 display_line(string line, string message)
 {
+    llOwnerSay("display_line " + line + " " + message);
     // Setup XYtext Variables
     #define DISPLAY_STRING      204000
 // Not Used
@@ -240,7 +243,8 @@ list category_menu(integer num)
         menu += BUTTON_HELP;
     }
 
-    return menu;    // order_buttons(menu);
+    return order_buttons(menu);
+    // return menu;
 }
 
 // Returns the number of stations in a certain category
@@ -340,7 +344,8 @@ list station_menu(integer num)
             menu += llList2String(stations,len);
     }
 
-    return menu; // order_buttons(menu);
+    return order_buttons(menu);
+    // return menu;
 }
 
 // Returns whether av with key id has access
@@ -870,8 +875,9 @@ state menu
 
     timer()
     {
-        retrieve_titelinfo();
-        llSetTimerEvent(UPDATE_TIME);
+        // SJ: We have no title information to retrived.
+        // retrieve_titelinfo();
+        // llSetTimerEvent(UPDATE_TIME);
     }
 
     http_response(key id, integer status, list meta, string body)
