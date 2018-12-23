@@ -19,6 +19,6 @@ default {
     {
         llSay(0, "Starting radio slave.");
         llListenRemove(listen_handle);
-        listen_handle = llListen(LISTEN_CHANNEL, "", NULL_KEY, "");
+        listen_handle = llListen(RADIO_SLAVE_CHANNEL, "", NULL_KEY, "");
     }
 }

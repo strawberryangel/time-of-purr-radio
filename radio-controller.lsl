@@ -582,7 +582,9 @@ integer process_line(string dataline)
 set_parcel_url(string url)
 {
     parcel_url=url;
-    llSetParcelMusicURL(parcel_url);
+    // llSetParcelMusicURL(parcel_url);
+    // Broadcast URL to slave.
+    llRegionSay(RADIO_SLAVE_CHANNEL, url);
 
     if (parcel_url=="")
     {
