@@ -1,5 +1,3 @@
-#include "lib/dialog.lsl"
-
 // Script:  Shoutcast - radio controller
 // Version: 0.3 - released 10-2-2011
 // Logic Scripts (Flennan Roffo)
@@ -9,6 +7,8 @@
 // + LandOwnersRadio V2.0 by Scripter Coba  (( menu driven / notecard config script to select the radio station and sets parcel music url ))
 // + Raven radio infoboard by Jamie Otis    (( worked at the basis of sis service [sis.slserver.com/sis.php] used Xy text display         ))
 // + currentPlaying by Darkie Minotaur      (( used the /7.html info to fetch current song title info, displayed as float text            ))
+//
+// Altered for use at Time of Purr Cafe by mommypickles, with bug fixes.
 //
 // Purpose:
 // * Sets the parcel audio URL and displays the channel info
@@ -149,7 +149,6 @@ retrieve_titelinfo()
 // Display a line on an Xytext device linked in
 display_line(string line, string message)
 {
-    llOwnerSay("display_line " + line + " " + message);
     // Setup XYtext Variables
     #define DISPLAY_STRING      204000
 // Not Used
@@ -192,7 +191,13 @@ make_menu(key id)
         }
         else
         {
-            llDialog(id,"Menu: Stations\nGenre: " + llList2String(category_list,category_index), station_menu(menu_num),menu_channel);
+            llDialog(id,
+                "Menu: Stations\nGenre:" +
+                llList2String(category_list,category_index) +
+                "\n\nChoose MAIN to choose another genre.",
+                station_menu(menu_num),
+                menu_channel
+            );
         }
     }
 
@@ -264,28 +269,13 @@ integer stations_in_category(integer cat)
     return count;
 }
 
-// Not used currently -- to fix button placement
-/*
+// llDialog presents buttons in a stupid order.
+// This fixes that problem.
 list order_buttons(list buttons)
 {
-    integer offset;
-    list fixt;
-    integer flag=0;
-
-    while((offset = llGetListLength(buttons)))
-    {
-        if (offset > 3)
-            flag=1;
-        else
-            flag=0;
-
-        fixt += llList2List(buttons, offset = -3 * flag, -1);
-        buttons = llDeleteSubList(buttons, offset, -1);
-    }
-
-    return fixt;
+	return llList2List(buttons, -3, -1) + llList2List(buttons, -6, -4)
+		+ llList2List(buttons, -9, -7) + llList2List(buttons, -12, -10);
 }
-*/
 
 // Returns a list of station names in a certain category (genre)
 list station_list(integer category)
@@ -528,7 +518,10 @@ integer process_line(string dataline)
     {
         if (llListFindList(category_list,(list)field) == -1)
         {
-            category_list += field;
+            // += was putting the list in reverse order.
+            // The order should be the same as the notecard now.
+            category_list = field + category_list;
+            // category_list += field;
         }
         else
             llWhisper(0,"genre: '" + field + "' already entered; double entry skipped.");
@@ -555,10 +548,17 @@ integer process_line(string dataline)
             if (llListFindList(station_url,(list)url) == -1 || llListFindList(station_category,(list)category) == -1)
             {
                 num_stations++;
-                station_category += category;
-                station_name += name;
-                station_desc += desc;
-                station_url += url;
+
+                // += was putting the lists in reverse order.
+                // The order should be the same as the notecard now.
+                station_category = category + station_category;
+                station_name = name + station_name;
+                station_desc = desc + station_desc;
+                station_url = url + station_url;
+                // station_category += category;
+                // station_name += name;
+                // station_desc += desc;
+                // station_url += url;
                 return TRUE;
             }
             else
