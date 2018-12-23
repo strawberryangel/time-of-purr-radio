@@ -14,3 +14,17 @@ These are the scripts for the radio in Time of Purr Cafe.
 The script `radio-controller.lsl` was taken from
 [Shoutcast - radio controller v0.3](http://wiki.secondlife.com/wiki/Shoutcast_-_radio_controller_v0.3_(remake_of_similar_scripts))
 and altered.
+
+The scripts use the Firestorm LSL pre-processor.
+The actual scripts in-world look like the following,
+where `XXXX` is the communication channel name.
+
+```c
+#define RADIO_SLAVE_CHANNEL XXXX
+#include "radio/radio-slave.lsl"
+```
+
+```c
+#define RADIO_SLAVE_CHANNEL XXXX
+#include "radio/radio-controller.lsl"
+```
