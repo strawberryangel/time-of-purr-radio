@@ -1,0 +1,61 @@
+# New format Shoutcast - radio controller config notecard
+# The format is divided in 4 sections:
+# 1 - Access configuration
+# 2 - Ban list (keys)
+# 3 - Categories  (same as genres)
+# 4 - Station info (category, name, desc, url)
+# The '#' character defines the start of a comment and can be anywhere on a line.
+# Everything after the '#' including the '#' itself is ignored.
+# Case is not important (but information on display will show as entered)
+# Spaces before and/or after fields are trimmed.
+# Empty lines are ignored.
+
+[ACCESS]
+owner=yes       # yes, true,1      means owner has access. everything else not.
+group=yes       #  ,,  ,,  ,,      means group has acesss.   ,,        ,,   ,,
+public=yes      #  ,,  ,,  ,,      means public has access.  ,,        ,,   ,,
+
+[BANNED]
+# keys of banned residents
+
+[GENRE]
+# genre name -- Use short genre names as the length of menu buttons is short!
+Cafe
+DJ
+Chill
+Dance
+Classical
+World
+Industrial
+Goth
+Dark
+# etc.
+[STATION]
+# Shoutcast radio stations
+# Use a '|' between each field - don't mind spaces before and after fields, they will be trimmed
+# field1:genre, field2:station name, field3: station description, field4: station http://<ip>:<port> or https://<ip>:<port>
+# Note that genre must match case-insensitive a value previously entered in section [GENRE]
+Cafe | RetroSynth | RetroSynth FM | http://144.217.203.184:9448/stream
+Chill | Cryosleep | Echoes of BLUEMARS - Cryosleep | http://streams.echoesofbluemars.org:8000/cryosleep
+Chill | Goa | Suburbs of Goa | http://ice1.somafm.com/suburbsofgoa-128-mp3
+Chill | New Age 1 | Trancemission.FM Radio New Age 2 | http://87.230.21.161:6667
+Chill | New Age 2 | Trancemission.FM Radio New Age 2 | http://87.230.84.182:9000/
+Chill | TrueHouse | Smooth Jazz TrueHouse | http://stream.truehouse.net:8000/chill
+Classical | Ancient | Ancient FM (early and Renaissance) | http://simplexstream.com:8058
+Dance | Dance Island | Dance Island | http://danceisland.gclef320kbps.com:10056
+Dark | Dark Doll | Radio Dark Doll | http://209.133.216.3:7298
+Dark | Ghost Box | Ghost Box Radio | http://108.61.154.147:5940/
+DJ | Sophie | Sophie's Stream |  http://eu.streamhood.com:8004
+Goth | Gothique13 | Gothique13.com | http://66.55.145.43:7037/
+Goth | Pangea | Pangea | http://88.198.69.145:8010
+Industrial | Acidic | Acidic Infektion | http://radio.acidicinfektion.ind.in:8047
+Industrial | Christian | Christianindustrial.net: Pure. Industrial. Goodness. | http://streams.christianindustrial.net:80/radio.mp3
+Industrial | EBM Radio | EBM Radio | http://www.ebm-radio.org:7000/
+Industrial | Empty | Empty Chaos Radio | http://104.251.118.50:8090
+Industrial | EoD | End of Days Radio | http://77.92.64.44:8179
+Industrial | Sanctuary | Sanctuary Radio | http://205.164.41.90:8002
+Industrial | Schwarze | Schwarze Welle  | http://www.schwarze-welle.de:7500/
+Industrial | The Link | The Link | http://thelink.nexus.rocks:8094
+Industrial | Tormented | Tormented Radio | http://35.172.169.140:8070/tormented.mp3
+Industrial | Zero | Club Zero Radio | http://108.61.154.147:5050/
+World | Parvana | Parvana Radio | http://66.55.145.43:7720
