@@ -67,24 +67,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-string info_notecard="Radio Control info";              ///////    EDITABLE  \\\\\\
-string config_notecard="Radio Control config";          ///////    EDITABLE  \\\\\\
-string comment_char="#";                                ///////    EDITABLE  \\\\\\
-list sep_char_list= ["|"];                              ///////    EDITABLE  \\\\\\
-float update_time=5.0;                                  ///////    EDITABLE  \\\\\\
-string no_title_info="(no title info available)";       ///////    EDITABLE  \\\\\\
+#define INFO_NOTECARD "Radio Control info"
+#define CONFIG_NOTECARD "Radio Control config"
+#define COMMENT_CHAR "#"
+#define SEP_CHAR_LIST ["|"]
+#define UPDATE_TIME 5.0
+#define NO_TITLE_INFO "(no title info available)"
 
 // not used currently - for showing info on current song title elsewhere in the region
 integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
 
 // Buttons
 
-string button_MAIN = "MAIN";                            ///////    EDITABLE  \\\\\\
-string button_HELP = "HELP";                            ///////    EDITABLE  \\\\\\
-string button_NEXT = ">>";                              ///////    EDITABLE  \\\\\\
-string button_PREV = "<<";                              ///////    EDITABLE  \\\\\\
-string button_ON   = "ON";                              ///////    EDITABLE  \\\\\\
-string button_OFF  = "OFF";                             ///////    EDITABLE  \\\\\\
+#define BUTTON_MAIN "MAIN"
+#define BUTTON_HELP "HELP"
+#define BUTTON_NEXT ">>"
+#define BUTTON_PREV "<<"
+#define BUTTON_ON   "ON"
+#define BUTTON_OFF  "OFF"
 
 //////////////////////////////////
 // Don't touch the variables below
@@ -217,17 +217,17 @@ list category_menu(integer num)
                 menu += llList2String(category_list,len);
 
              if (num == 0)
-                menu += button_HELP;
+                menu += BUTTON_HELP;
              else
-                 menu += button_MAIN;
+                 menu += BUTTON_MAIN;
 
              if (num == 0)
-                menu += button_OFF;
+                menu += BUTTON_OFF;
              else
-                menu += button_PREV;
+                menu += BUTTON_PREV;
 
              if (num != last_sub)
-                menu += button_NEXT;
+                menu += BUTTON_NEXT;
         }
     }
     else
@@ -235,8 +235,8 @@ list category_menu(integer num)
         while (--len >= 0)
             menu += llList2String(category_list,len);
 
-        menu += button_OFF;
-        menu += button_HELP;
+        menu += BUTTON_OFF;
+        menu += BUTTON_HELP;
     }
 
     return menu;    // order_buttons(menu);
@@ -314,13 +314,13 @@ list station_menu(integer num)
              integer first=9*num;
              integer last=9*num+8;
 
-             menu += button_MAIN;
+             menu += BUTTON_MAIN;
 
              if (num > 0)
-                menu += button_PREV;
+                menu += BUTTON_PREV;
 
              if (num < last_sub)
-                menu += button_NEXT;
+                menu += BUTTON_NEXT;
 
             if (len > last)
                 len =last;
@@ -331,7 +331,7 @@ list station_menu(integer num)
     }
     else
     {
-        menu += button_MAIN;
+        menu += BUTTON_MAIN;
 
         while (--len >= 0)
             menu += llList2String(stations,len);
@@ -422,13 +422,13 @@ integer true_value(string input)
 integer process_line(string dataline)
 {
     string line=llStringTrim(dataline,STRING_TRIM);
-    integer index=llSubStringIndex(line,comment_char);
+    integer index=llSubStringIndex(line,COMMENT_CHAR);
 
     if (index==0)       // line starts with comment - ignore line
         return TRUE;
 
     if (index!=-1)
-        line=llStringTrim(llGetSubString(line,0,index-1),STRING_TRIM_TAIL);   // skip everything after comment_char and trim tail
+        line=llStringTrim(llGetSubString(line,0,index-1),STRING_TRIM_TAIL);   // skip everything after COMMENT_CHAR and trim tail
 
     if (line=="")       // Ignore blank lines
         return TRUE;
@@ -523,7 +523,7 @@ integer process_line(string dataline)
     }
     else if (section == 4)            // stations
     {
-        list parse=llParseString2List(line,sep_char_list, []);
+        list parse=llParseString2List(line,SEP_CHAR_LIST, []);
         string category=llStringTrim(llList2String(parse,0),STRING_TRIM);
         string name=llStringTrim(llList2String(parse,1),STRING_TRIM);
         string desc=llStringTrim(llList2String(parse,2),STRING_TRIM);
@@ -583,7 +583,7 @@ set_parcel_url(string url)
         display_line("1","Station: " + llList2String(station_desc,station_index));
         display_line("2","Genre  : " + llList2String(category_list,category_index));
         display_line("3","Now playing.....");
-        llSetTimerEvent(update_time);
+        llSetTimerEvent(UPDATE_TIME);
     }
 }
 
@@ -649,9 +649,9 @@ default
         menu_num=0;
         menu_type=0;
 
-        if (llGetInventoryType(config_notecard) == INVENTORY_NOTECARD)
+        if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
         {
-           reqid=llGetNotecardLine(config_notecard,lineno++);
+           reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
            llWhisper(0, "Reading config notecard...");
            display_line("1","Reading configuration.");
            display_line("2","Wait....");
@@ -659,7 +659,7 @@ default
         }
         else
         {
-            llWhisper(0,"No config notecard '" +  config_notecard + "' present.");
+            llWhisper(0,"No config notecard '" +  CONFIG_NOTECARD + "' present.");
             state offline;
         }
     }
@@ -685,7 +685,7 @@ default
             else
             {
                 if (process_line(data))
-                    reqid=llGetNotecardLine(config_notecard,lineno++);
+                    reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
                 else if (config_error)
                 {
                     llWhisper(0,"errors found in configuration. please correct them.");
@@ -766,23 +766,23 @@ state menu
 
         if (menu_type == 0)          // main menu
         {
-            if (msg == button_MAIN)
+            if (msg == BUTTON_MAIN)
             {
                 menu_type=0;
                 menu_num =0;
                 make_menu(id);
             }
-            else if (msg == button_NEXT)
+            else if (msg == BUTTON_NEXT)
             {
                 menu_num++;
                 make_menu(id);
             }
-            else if (msg == button_PREV)
+            else if (msg == BUTTON_PREV)
             {
                 menu_num--;
                 make_menu(id);
             }
-            else if (msg == button_ON)
+            else if (msg == BUTTON_ON)
             {
                 radio_status=1;
                 set_parcel_url(parcel_url);
@@ -791,18 +791,18 @@ state menu
                 llWhisper(0,"Radio now turned on.");
                 make_menu(id);
             }
-            else if (msg == button_OFF)
+            else if (msg == BUTTON_OFF)
             {
                 radio_status=0;
                 set_parcel_url("");
                 llSetTimerEvent(0.0);
                 llWhisper(0,"Radio now turned off.");
             }
-            else if (msg == button_HELP)
+            else if (msg == BUTTON_HELP)
             {
-                if (llGetInventoryType(info_notecard) == INVENTORY_NOTECARD)
+                if (llGetInventoryType(INFO_NOTECARD) == INVENTORY_NOTECARD)
                 {
-                    llGiveInventory(id,info_notecard);
+                    llGiveInventory(id,INFO_NOTECARD);
                 }
                 else
                     llWhisper(0,"sorry, help not available.");
@@ -825,18 +825,18 @@ state menu
         }
         else if (menu_type == 1 && radio_status == 1)     // station menu
         {
-            if (msg == button_MAIN)
+            if (msg == BUTTON_MAIN)
             {
                 menu_type=0;
                 menu_num =0;
                 make_menu(id);
             }
-            else if (msg == button_NEXT)
+            else if (msg == BUTTON_NEXT)
             {
                 menu_num++;
                 make_menu(id);
             }
-            else if (msg == button_PREV)
+            else if (msg == BUTTON_PREV)
             {
                 menu_num--;
                 make_menu(id);
@@ -864,7 +864,7 @@ state menu
     timer()
     {
         retrieve_titelinfo();
-        llSetTimerEvent(update_time);
+        llSetTimerEvent(UPDATE_TIME);
     }
 
     http_response(key id, integer status, list meta, string body)
@@ -895,7 +895,7 @@ state menu
             }
             else
             {
-                display_line("3","Title  : " + no_title_info);
+                display_line("3","Title  : " + NO_TITLE_INFO);
             }
         }
     }
