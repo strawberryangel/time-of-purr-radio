@@ -76,6 +76,8 @@
 #define UPDATE_TIME 5.0
 #define NO_TITLE_INFO "(no title info available)"
 
+#define DEFAULT_RADIO_STATUS 1
+
 // not used currently - for showing info on current song title elsewhere in the region
 // integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
 
@@ -106,7 +108,7 @@ list station_url=[];
 // Last song title played
 string last_title_info="";
 
-integer radio_status=0;    // 0 - OFF   1 - ON
+integer radio_status=DEFAULT_RADIO_STATUS;    // 0 - OFF   1 - ON
 string parcel_url="";
 integer lineno=0;
 key reqid=NULL_KEY;
@@ -211,7 +213,7 @@ list category_menu(integer num)
         if (num > last_sub)
         {
             llWhisper(0,"error: wrong submenu number: " + (string) num + ".");
-            return [ "MAIN" ];
+            return [ BUTTON_MAIN ];
         }
         else
         {
@@ -221,12 +223,12 @@ list category_menu(integer num)
                 menu += llList2String(category_list,len);
 
              if (num == 0)
-                menu += BUTTON_HELP;
+                ; // menu += BUTTON_HELP;
              else
                  menu += BUTTON_MAIN;
 
              if (num == 0)
-                menu += BUTTON_OFF;
+                ; // menu += BUTTON_OFF;
              else
                 menu += BUTTON_PREV;
 
@@ -239,8 +241,8 @@ list category_menu(integer num)
         while (--len >= 0)
             menu += llList2String(category_list,len);
 
-        menu += BUTTON_OFF;
-        menu += BUTTON_HELP;
+        // menu += BUTTON_OFF;
+        // menu += BUTTON_HELP;
     }
 
     return order_buttons(menu);
@@ -657,7 +659,7 @@ default
         config_error=FALSE;
         num_stations=0;
         num_categories=0;
-        radio_status=0;
+        radio_status=DEFAULT_RADIO_STATUS;
         menu_num=0;
         menu_type=0;
 
