@@ -76,8 +76,6 @@
 #define UPDATE_TIME 5.0
 #define NO_TITLE_INFO "(no title info available)"
 
-#define DEFAULT_RADIO_STATUS 1
-
 // not used currently - for showing info on current song title elsewhere in the region
 // integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
 
@@ -108,6 +106,9 @@ list station_url=[];
 // Last song title played
 string last_title_info="";
 
+#define RADIO_ON 1
+#define RADIO_OFF 0
+#define DEFAULT_RADIO_STATUS RADIO_ON
 integer radio_status=DEFAULT_RADIO_STATUS;    // 0 - OFF   1 - ON
 string parcel_url="";
 integer lineno=0;
@@ -128,7 +129,9 @@ integer menu_channel;
 integer listen_handle;
 
 // Menu
-integer menu_type=0;         // 0 - Main menu (genres)   1 - Station menu (stations)
+#define MENU_TYPE_MAIN 0
+#define MENU_TYPE_STATION 1
+integer menu_type=MENU_TYPE_MAIN; // 0 - Main menu (genres)   1 - Station menu (stations)
 integer menu_num=0;          // When more menu options need to be selectable then can be displayed on a menu (12), this is the menu number - menu number 0 is the first menu.
 
 // Genres and stations
@@ -177,15 +180,15 @@ make_menu(key id)
 {
      menu_channel=random_channel();
 
-    if (radio_status == 0)
+    if (radio_status == RADIO_OFF)
     {
-        menu_type=0;
+        menu_type=MENU_TYPE_MAIN;
         menu_num=0;
         llDialog(id,"Menu: Status\n\nRadio is OFF", [ "ON", "HELP" ],menu_channel);
     }
     else
     {
-        if (menu_type ==0)
+        if (menu_type ==MENU_TYPE_MAIN)
         {
             llDialog(id,"Menu: Genres", category_menu(menu_num),menu_channel);
         }
@@ -201,7 +204,7 @@ make_menu(key id)
         }
     }
 
-    if (listen_handle != 0)    llListenRemove(listen_handle);
+    llListenRemove(listen_handle);
     listen_handle=llListen(menu_channel,"",id,"");
 }
 
@@ -663,7 +666,7 @@ default
         num_categories=0;
         radio_status=DEFAULT_RADIO_STATUS;
         menu_num=0;
-        menu_type=0;
+        menu_type=MENU_TYPE_MAIN;
 
         if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
         {
@@ -754,9 +757,9 @@ state menu
 {
     state_entry()
     {
-        menu_type=0;
+        menu_type=MENU_TYPE_MAIN;
         menu_num=0;
-        listen_handle=0;
+        llListenRemove(listen_handle);
     }
 
     on_rez(integer param)
@@ -780,11 +783,11 @@ state menu
     {
         integer index;
 
-        if (menu_type == 0)          // main menu
+        if (menu_type == MENU_TYPE_MAIN)          // main menu
         {
             if (msg == BUTTON_MAIN)
             {
-                menu_type=0;
+                menu_type=MENU_TYPE_MAIN;
                 menu_num =0;
                 make_menu(id);
             }
@@ -800,7 +803,7 @@ state menu
             }
             else if (msg == BUTTON_ON)
             {
-                radio_status=1;
+                radio_status=RADIO_ON;
                 set_parcel_url(parcel_url);
                 display_line("1","Radio is ON");
                 menu_num=0;
@@ -809,7 +812,7 @@ state menu
             }
             else if (msg == BUTTON_OFF)
             {
-                radio_status=0;
+                radio_status=RADIO_OFF;
                 set_parcel_url("");
                 llSetTimerEvent(0.0);
                 llWhisper(0,"Radio now turned off.");
@@ -823,7 +826,7 @@ state menu
                 else
                     llWhisper(0,"sorry, help not available.");
             }
-            else if (radio_status == 1)
+            else if (radio_status == RADIO_ON)
             {
                 index = llListFindList(category_list, (list)msg);
 
@@ -833,17 +836,17 @@ state menu
                 {
                     category_index=index;
                     llWhisper(0,"Genre now set to " + llList2String(category_list,category_index) + ".");
-                    menu_type=1;
+                    menu_type=MENU_TYPE_STATION;
                     menu_num=0;
                     make_menu(id);
                 }
             }
         }
-        else if (menu_type == 1 && radio_status == 1)     // station menu
+        else if (menu_type == MENU_TYPE_STATION && radio_status == RADIO_ON)     // station menu
         {
             if (msg == BUTTON_MAIN)
             {
-                menu_type=0;
+                menu_type=MENU_TYPE_MAIN;
                 menu_num =0;
                 make_menu(id);
             }
