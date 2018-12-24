@@ -131,8 +131,9 @@ integer listen_handle;
 // Menu
 #define MENU_TYPE_MAIN 0
 #define MENU_TYPE_STATION 1
+#define MENU_NUM_FIRST 0
 integer menu_type=MENU_TYPE_MAIN; // 0 - Main menu (genres)   1 - Station menu (stations)
-integer menu_num=0;          // When more menu options need to be selectable then can be displayed on a menu (12), this is the menu number - menu number 0 is the first menu.
+integer menu_num=MENU_NUM_FIRST;          // When more menu options need to be selectable then can be displayed on a menu (12), this is the menu number - menu number 0 is the first menu.
 
 // Genres and stations
 
@@ -183,7 +184,7 @@ make_menu(key id)
     if (radio_status == RADIO_OFF)
     {
         menu_type=MENU_TYPE_MAIN;
-        menu_num=0;
+        menu_num=MENU_NUM_FIRST;
         llDialog(id,"Menu: Status\n\nRadio is OFF", [ "ON", "HELP" ],menu_channel);
     }
     else
@@ -665,7 +666,7 @@ default
         num_stations=0;
         num_categories=0;
         radio_status=DEFAULT_RADIO_STATUS;
-        menu_num=0;
+        menu_num=MENU_NUM_FIRST;
         menu_type=MENU_TYPE_MAIN;
 
         if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
@@ -758,7 +759,7 @@ state menu
     state_entry()
     {
         menu_type=MENU_TYPE_MAIN;
-        menu_num=0;
+        menu_num=MENU_NUM_FIRST;
         llListenRemove(listen_handle);
     }
 
@@ -788,7 +789,7 @@ state menu
             if (msg == BUTTON_MAIN)
             {
                 menu_type=MENU_TYPE_MAIN;
-                menu_num =0;
+                menu_num =MENU_NUM_FIRST;
                 make_menu(id);
             }
             else if (msg == BUTTON_NEXT)
@@ -806,7 +807,7 @@ state menu
                 radio_status=RADIO_ON;
                 set_parcel_url(parcel_url);
                 display_line("1","Radio is ON");
-                menu_num=0;
+                menu_num=MENU_NUM_FIRST;
                 llWhisper(0,"Radio now turned on.");
                 make_menu(id);
             }
@@ -837,7 +838,7 @@ state menu
                     category_index=index;
                     llWhisper(0,"Genre now set to " + llList2String(category_list,category_index) + ".");
                     menu_type=MENU_TYPE_STATION;
-                    menu_num=0;
+                    menu_num=MENU_NUM_FIRST;
                     make_menu(id);
                 }
             }
@@ -847,7 +848,7 @@ state menu
             if (msg == BUTTON_MAIN)
             {
                 menu_type=MENU_TYPE_MAIN;
-                menu_num =0;
+                menu_num =MENU_NUM_FIRST;
                 make_menu(id);
             }
             else if (msg == BUTTON_NEXT)
