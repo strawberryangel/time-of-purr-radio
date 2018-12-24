@@ -782,6 +782,16 @@ state menu
 
     listen(integer chan, string name,key id,string msg)
     {
+        if(chan == RADIO_RESET_CHANNEL)
+        {
+            // When the radio is reset automatically,
+            // this message is sent.
+            // The radio needs to forget its settings.
+            menu_type=MENU_TYPE_MAIN;
+            menu_num=MENU_NUM_FIRST;
+            return;
+        }
+
         integer index;
 
         if (menu_type == MENU_TYPE_MAIN)          // main menu
