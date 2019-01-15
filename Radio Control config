@@ -4,6 +4,7 @@
 # 2 - Ban list (keys)
 # 3 - Categories  (same as genres)
 # 4 - Station info (category, name, desc, url)
+# 5 - OPTIONAL - Put an asterisk (*) here if the station is the default station.
 # The '#' character defines the start of a comment and can be anywhere on a line.
 # Everything after the '#' including the '#' itself is ignored.
 # Case is not important (but information on display will show as entered)
@@ -20,7 +21,7 @@ public=yes      #  ,,  ,,  ,,      means public has access.  ,,        ,,   ,,
 
 [GENRE]
 # genre name -- Use short genre names as the length of menu buttons is short!
-Cafe
+Synth Wave
 DJ
 Chill
 Dance
@@ -35,7 +36,7 @@ Dark
 # Use a '|' between each field - don't mind spaces before and after fields, they will be trimmed
 # field1:genre, field2:station name, field3: station description, field4: station http://<ip>:<port> or https://<ip>:<port>
 # Note that genre must match case-insensitive a value previously entered in section [GENRE]
-Cafe | RetroSynth | RetroSynth FM | http://144.217.203.184:9448/stream
+Synth Wave | RetroSynth | RetroSynth FM | http://144.217.203.184:9448/stream | *
 Chill | Cryosleep | Echoes of BLUEMARS - Cryosleep | http://streams.echoesofbluemars.org:8000/cryosleep
 Chill | Goa | Suburbs of Goa | http://ice1.somafm.com/suburbsofgoa-128-mp3
 Chill | New Age 1 | Trancemission.FM Radio New Age 2 | http://87.230.21.161:6667

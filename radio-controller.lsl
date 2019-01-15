@@ -103,6 +103,12 @@ list station_name=[];
 list station_desc=[];
 list station_url=[];
 
+// Default station information.
+string default_station_name = "";
+string default_station_category = "";
+string default_station_desc = "";
+string default_station_url = "";
+
 // Last song title played
 string last_title_info="";
 
@@ -539,6 +545,8 @@ integer process_line(string dataline)
         string name=llStringTrim(llList2String(parse,1),STRING_TRIM);
         string desc=llStringTrim(llList2String(parse,2),STRING_TRIM);
         string url=llStringTrim(llToLower(llList2String(parse,3)),STRING_TRIM);
+        // If this is the default station, put a | * at the end of the line.
+        string default_station=llStringTrim(llToLower(llList2String(parse, 4)), STRING_TRIM);
 
         if (!available_category(category))
         {
@@ -559,10 +567,14 @@ integer process_line(string dataline)
                 station_name = name + station_name;
                 station_desc = desc + station_desc;
                 station_url = url + station_url;
-                // station_category += category;
-                // station_name += name;
-                // station_desc += desc;
-                // station_url += url;
+
+                // Is this the default station?
+                if(default_station == "*") {
+                    default_station_name = name;
+                    default_station_category = category;
+                    default_station_desc = desc;
+                    default_station_url = url;
+                }
                 return TRUE;
             }
             else
@@ -652,6 +664,48 @@ skip_empty_categories()
     num_categories=llGetListLength(category_list);
 }
 
+reset_radio()
+{
+    menu_type = MENU_TYPE_MAIN;
+    set_genre_by_name(default_station_category);
+    set_station_by_name(default_station_name);
+}
+
+integer set_genre_by_name(string msg)
+{
+    integer index = llListFindList(category_list, (list)msg);
+
+    if (index == -1)
+    {
+        llSay(0,"error: genre not found: " + msg);
+        return FALSE;
+    }
+    else
+    {
+        category_index=index;
+        llSay(0,"Genre is now set to " + llList2String(category_list,category_index) + ".");
+        return TRUE;
+    }
+}
+
+set_station_by_name(string msg)
+{
+    integer index = llListFindList(station_name, (list)msg);
+
+    if (index == -1)
+        llSay(0,"error: station not found: " + msg);
+    else
+    {
+        station_index=index;
+        string new_url=llList2String(station_url,station_index);
+
+        if (new_url != parcel_url)
+        {
+            set_parcel_url(new_url);
+        }
+    }
+}
+
 /////////////////////////////////////////////
 // state default
 ////////////////////////////////////////////
@@ -668,6 +722,11 @@ default
         radio_status=DEFAULT_RADIO_STATUS;
         menu_num=MENU_NUM_FIRST;
         menu_type=MENU_TYPE_MAIN;
+
+        default_station_name = "";
+        default_station_category = "";
+        default_station_desc = "";
+        default_station_url = "";
 
         if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
         {
@@ -786,13 +845,12 @@ state menu
     listen(integer chan, string name,key id,string msg)
     {
         #ifdef RADIO_RESET_CHANNEL
+        // When the radio is reset automatically,
+        // this message is sent.
+        // The radio needs to forget its settings.
         if(chan == RADIO_RESET_CHANNEL)
         {
-            // When the radio is reset automatically,
-            // this message is sent.
-            // The radio needs to forget its settings.
-            menu_type=MENU_TYPE_MAIN;
-            menu_num=MENU_NUM_FIRST;
+            reset_radio();
             return;
         }
         #endif
@@ -844,14 +902,8 @@ state menu
             }
             else if (radio_status == RADIO_ON)
             {
-                index = llListFindList(category_list, (list)msg);
-
-                if (index == -1)
-                    llSay(0,"error: genre not found: " + msg);
-                else
+                if(set_genre_by_name(msg))
                 {
-                    category_index=index;
-                    llSay(0,"Genre is now set to " + llList2String(category_list,category_index) + ".");
                     menu_type=MENU_TYPE_STATION;
                     menu_num=MENU_NUM_FIRST;
                     make_menu(id);
@@ -877,22 +929,7 @@ state menu
                 make_menu(id);
             }
             else
-            {
-                index = llListFindList(station_name, (list)msg);
-
-                if (index == -1)
-                    llSay(0,"error: station not found: " + msg);
-                else
-                {
-                    station_index=index;
-                    string new_url=llList2String(station_url,station_index);
-
-                    if (new_url != parcel_url)
-                    {
-                        set_parcel_url(new_url);
-                    }
-                }
-            }
+                set_station_by_name(msg);
         }
     }
 
