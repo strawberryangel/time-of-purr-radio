@@ -149,6 +149,10 @@ integer station_index=0;     // Current index in station_*      (station)
 integer num_categories=0;
 integer num_stations=0;
 
+string text1 = "";
+string text2 = "";
+string text3 = "";
+
 // Make request for title info using HTTP request
 retrieve_titelinfo()
 {
@@ -159,18 +163,12 @@ retrieve_titelinfo()
 // Display a line on an Xytext device linked in
 display_line(string line, string message)
 {
-    // Setup XYtext Variables
-    #define DISPLAY_STRING      204000
-// Not Used
-//    #define DISPLAY_EXTENDED    204001
-//    #define REMAP_INDICES       204002
-//    #define RESET_INDICES       204003
-//    #define SET_CELL_INFO       204004
-//    #define SET_FONT_TEXTURE    204005
-//    #define SET_THICKNESS       204006
-//    #define SET_COLOR           204007
+    if(line == "1") text1 = message;
+    if(line == "2") text2 = message;
+    if(line == "3") text3 = message;
 
-    llMessageLinked(LINK_SET,DISPLAY_STRING,message,line);
+    string hovertext = text1 + "\n" + text2 + "\n" + text3;
+    llSetText(hovertext, <0.7, 0.7, 0.7>, 1.0);
 }
 
 // Clear the Xytext display
@@ -612,9 +610,9 @@ set_parcel_url(string url)
     else
     {
         llSay(0,"The station is now set to " + llList2String(station_desc,station_index) + ".");
-        display_line("1","Station: " + llList2String(station_desc,station_index));
-        display_line("2","Genre  : " + llList2String(category_list,category_index));
-        display_line("3","Now playing.....");
+        display_line("1","Now playing.....");
+        display_line("2","Station: " + llList2String(station_desc,station_index));
+        display_line("3","Genre  : " + llList2String(category_list,category_index));
         llSetTimerEvent(UPDATE_TIME);
     }
 }
