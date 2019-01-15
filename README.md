@@ -10,6 +10,8 @@ These are the scripts for the radio in Time of Purr Cafe.
     [the documentation](http://wiki.secondlife.com/wiki/LlSetParcelMusicURL).
     It's a pain in the butt when the actual radio is deeded to the group.
 *   `Radio Control config` is the configuration file for Time of Purr Cafe.
+*   `reset-parcel-music.ls` waits for the parcel to be empty, then sends
+    a reset message for the radio.
 
 The script `radio-controller.lsl` was taken from
 [Shoutcast - radio controller v0.3](http://wiki.secondlife.com/wiki/Shoutcast_-_radio_controller_v0.3_(remake_of_similar_scripts))
