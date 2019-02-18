@@ -375,9 +375,8 @@ integer random_channel()
     return (integer) (min + llFrand(max-min));
 }
 
-// Check for the format of the url string  -- is very selective about url format
-// expects:   xxx.xxx.xxx.xxx:xxxx    (ip adress in number notation with port adress)
-// Next release will relax on this constraint.
+// Check for the format of the url string.
+// This only checks the protocol (http or https).
 integer check_url(string url)
 {
     integer pos=0;
@@ -388,33 +387,6 @@ integer check_url(string url)
         pos=8;
 
     if (pos==0)   return FALSE;
-
-    return TRUE;
-    // This extra checking is not valid.
-    // It rejects valid addresses that don't follow this form..
-
-    string str_ip_port=llGetSubString(url,pos,-1);
-    list list_ip_port=llParseString2List(str_ip_port,[":"],[]);                 // split in ip-adress and port
-    list list_ip=llParseString2List(llList2String(list_ip_port,0),["."],[]);    // split ip-adress elements
-
-    if (llGetListLength(list_ip_port) != 2 || llGetListLength(list_ip) != 4)
-        return FALSE;
-
-    integer i;
-    integer test;
-
-    for (i=0;i<4;i++)
-    {
-        test=llList2Integer(list_ip,i);
-        if (llList2String(list_ip,i) != (string)test)
-            return FALSE;
-        if (test < 0 || test > 255)
-            return FALSE;
-    }
-
-    test=llList2Integer(list_ip_port,1);
-    if (llList2String(list_ip_port,1) != (string)test)
-        return FALSE;
 
     return TRUE;
 }
@@ -556,7 +528,7 @@ integer process_line(string dataline)
         if (check_url(url))
         {
             // The rest of the code makes the assumption that the station name is unique.
-            // Enforce that here.
+            // Enforce that here so the entire code is consistent.
             if (llListFindList(station_name,(list)name))
             {
                 num_stations++;
