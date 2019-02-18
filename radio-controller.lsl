@@ -70,7 +70,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 #define INFO_NOTECARD "Radio Control info"
+#ifndef CONFIG_NOTECARD
 #define CONFIG_NOTECARD "Radio Control config"
+#endif
 #define COMMENT_CHAR "#"
 #define SEP_CHAR_LIST ["|"]
 #define UPDATE_TIME 5.0
@@ -106,8 +108,6 @@ list station_url=[];
 // Default station information.
 string default_station_name = "";
 string default_station_category = "";
-string default_station_desc = "";
-string default_station_url = "";
 
 // Last song title played
 string last_title_info="";
@@ -544,8 +544,6 @@ integer process_line(string dataline)
                 if(default_station == "*") {
                     default_station_name = name;
                     default_station_category = category;
-                    default_station_desc = desc;
-                    default_station_url = url;
                 }
                 return TRUE;
             }
@@ -699,8 +697,6 @@ default
 
         default_station_name = "";
         default_station_category = "";
-        default_station_desc = "";
-        default_station_url = "";
 
         if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
         {
@@ -712,7 +708,9 @@ default
         }
         else
         {
-            llSay(0,"No config notecard '" +  CONFIG_NOTECARD + "' present.");
+            display_line("1","Configuration FAILED.");
+            display_line("2","No notecard found.");
+            display_line("3","Load a notecard named '" +  CONFIG_NOTECARD + "'.");
             state offline;
         }
     }
@@ -741,15 +739,13 @@ default
                     reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
                 else if (config_error)
                 {
-                    llSay(0,"errors found in configuration. please correct them.");
+                    display_line("1","Configuration FAILED.");
+                    display_line("2","Errors in notecard.");
+                    display_line("3","Load a corrected notecard.");
                     state offline;
                 }
             }
         }
-    }
-
-    touch_start(integer total_num)
-    {
     }
 
     changed(integer ch)
