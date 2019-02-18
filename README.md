@@ -33,6 +33,9 @@ this radio will attempt to keep its genre and station
 synchronized with other radios in the region
 that are listening on this channel.
 
+If the optional `QUIET` is defined,
+the radio will minimize what it says in local chat.
+
 ```c
 #define RADIO_RESET_CHANNEL -1234
 #define RADIO_SLAVE_CHANNEL -5678
@@ -40,6 +43,7 @@ that are listening on this channel.
 ```
 
 ```c
+#define QUIET
 #define RADIO_RESET_CHANNEL -1234
 #define RADIO_SLAVE_CHANNEL -5678
 #define RADIO_SYNC_CHANNEL -9012

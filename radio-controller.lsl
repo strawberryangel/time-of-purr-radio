@@ -587,7 +587,9 @@ set_parcel_url(string url)
     }
     else
     {
+        #ifndef QUIET
         llSay(0,"The station is now set to " + llList2String(station_desc,station_index) + ".");
+        #endif
         display_line("1","Now playing.....");
         display_line("2","Station: " + llList2String(station_desc,station_index));
         display_line("3","Genre  : " + llList2String(category_list,category_index));
@@ -661,7 +663,9 @@ integer set_genre_by_name(string msg)
     else
     {
         category_index=index;
+        #ifndef QUIET
         llSay(0,"Genre is now set to " + llList2String(category_list,category_index) + ".");
+        #endif
         return TRUE;
     }
 }
@@ -741,7 +745,9 @@ default
         if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
         {
            reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
+           #ifndef QUIET
            llSay(0, "Reading config notecard...");
+           #endif
            display_line("1","Reading configuration.");
            display_line("2","Wait....");
            display_line("3","");
@@ -767,7 +773,9 @@ default
             if (data==EOF)
             {
                 skip_empty_categories();
+                #ifndef QUIET
                 llSay(0,"Configuration ok.\n" + (string)num_categories + " genres and " + (string)num_stations + " stations.");
+                #endif
                 display_line("1","Configuration OK");
                 display_line("2","Genres  : " + (string)num_categories);
                 display_line("3","Stations: " + (string)num_stations);
@@ -902,7 +910,9 @@ state menu
                 set_parcel_url(parcel_url);
                 display_line("1","Radio is ON");
                 menu_num=MENU_NUM_FIRST;
+                #ifndef QUIET
                 llSay(0,"Radio now turned on.");
+                #endif
                 make_menu(id);
             }
             else if (msg == BUTTON_OFF)
@@ -910,7 +920,9 @@ state menu
                 radio_status=RADIO_OFF;
                 set_parcel_url("");
                 llSetTimerEvent(0.0);
+                #ifndef QUIET
                 llSay(0,"Radio now turned off.");
+                #endif
             }
             else if (msg == BUTTON_HELP)
             {
