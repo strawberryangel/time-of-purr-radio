@@ -569,10 +569,14 @@ integer process_line(string dataline)
 // Sets the parcel URL and updates the display
 set_parcel_url(string url)
 {
-    parcel_url=url;
-    // llSetParcelMusicURL(parcel_url);
+    #ifndef RADIO_SLAVE_CHANNEL
+    if(url == parcel_url) return; // Preserve old behavior.
+    llSetParcelMusicURL(parcel_url);
+    #else
     // Broadcast URL to slave.
     llRegionSay(RADIO_SLAVE_CHANNEL, url);
+    #endif
+    parcel_url=url;
 
     if (parcel_url=="")
     {
@@ -636,12 +640,14 @@ skip_empty_categories()
     num_categories=llGetListLength(category_list);
 }
 
+#ifdef RADIO_RESET_CHANNEL
 reset_radio()
 {
     menu_type = MENU_TYPE_MAIN;
     set_genre_by_name(default_station_category);
     set_station_by_name(default_station_name);
 }
+#endif
 
 integer set_genre_by_name(string msg)
 {
@@ -671,12 +677,46 @@ set_station_by_name(string msg)
         station_index=index;
         string new_url=llList2String(station_url,station_index);
 
-        if (new_url != parcel_url)
-        {
-            set_parcel_url(new_url);
-        }
+        set_parcel_url(new_url);
     }
 }
+
+#ifdef RADIO_SYNC_CHANNEL
+update_from_sync(string json)
+{
+    string genre = llJsonGetValue(json, ["genre"]);
+    if(genre != JSON_INVALID)
+    {
+        set_genre_by_name(genre);
+        menu_type=MENU_TYPE_STATION;
+        menu_num=MENU_NUM_FIRST;
+    }
+
+    string station = llJsonGetValue(json, ["station"]);
+    if(station != JSON_INVALID)
+    {
+        set_station_by_name(station);
+    }
+}
+
+broadcast_genre_change(string genre)
+{
+    string json = llList2Json(JSON_OBJECT, [
+        "genre", genre
+    ]);
+
+    llRegionSay(RADIO_SYNC_CHANNEL, json);
+}
+
+broadcast_station_change(string station)
+{
+    string json = llList2Json(JSON_OBJECT, [
+        "station", station
+    ]);
+
+    llRegionSay(RADIO_SYNC_CHANNEL, json);
+}
+#endif
 
 /////////////////////////////////////////////
 // state default
@@ -793,6 +833,9 @@ state menu
         #ifdef RADIO_RESET_CHANNEL
         llListen(RADIO_RESET_CHANNEL,"",NULL_KEY,"");
         #endif
+        #ifdef RADIO_SYNC_CHANNEL
+        llListen(RADIO_SYNC_CHANNEL,"",NULL_KEY,"");
+        #endif
     }
 
     on_rez(integer param)
@@ -821,6 +864,14 @@ state menu
         if(chan == RADIO_RESET_CHANNEL)
         {
             reset_radio();
+            return;
+        }
+        #endif
+
+        #ifdef RADIO_SYNC_CHANNEL
+        if(chan == RADIO_SYNC_CHANNEL)
+        {
+            update_from_sync(msg);
             return;
         }
         #endif
@@ -874,6 +925,9 @@ state menu
             {
                 if(set_genre_by_name(msg))
                 {
+                    #ifdef RADIO_SYNC_CHANNEL
+                    broadcast_genre_change(msg);
+                    #endif
                     menu_type=MENU_TYPE_STATION;
                     menu_num=MENU_NUM_FIRST;
                     make_menu(id);
@@ -899,7 +953,12 @@ state menu
                 make_menu(id);
             }
             else
+            {
                 set_station_by_name(msg);
+                #ifdef RADIO_SYNC_CHANNEL
+                broadcast_station_change(msg);
+                #endif
+            }
         }
     }
 

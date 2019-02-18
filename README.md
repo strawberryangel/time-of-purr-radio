@@ -21,12 +21,27 @@ The scripts use the Firestorm LSL pre-processor.
 The actual scripts in-world look like the following,
 where `XXXX` is the communication channel name.
 
+If the optional `RADIO_SLAVE_CHANNEL` is defined,
+the radio will attempt to set the parcel music stream by
+broadcasting to a listening `radio-slave.lsl` script.
+
+If the optional `RADIO_RESET_CHANNEL` is defined,
+the radio will listen for a reset message on this channel.
+
+If the optional `RADIO_SYNC_CHANNEL` is defined,
+this radio will attempt to keep its genre and station
+synchronized with other radios in the region
+that are listening on this channel.
+
 ```c
-#define RADIO_SLAVE_CHANNEL XXXX
+#define RADIO_RESET_CHANNEL -1234
+#define RADIO_SLAVE_CHANNEL -5678
 #include "radio/radio-slave.lsl"
 ```
 
 ```c
-#define RADIO_SLAVE_CHANNEL XXXX
+#define RADIO_RESET_CHANNEL -1234
+#define RADIO_SLAVE_CHANNEL -5678
+#define RADIO_SYNC_CHANNEL -9012
 #include "radio/radio-controller.lsl"
 ```
