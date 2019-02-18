@@ -9,7 +9,7 @@ These are the scripts for the radio in Time of Purr Cafe.
     Details are in
     [the documentation](http://wiki.secondlife.com/wiki/LlSetParcelMusicURL).
     It's a pain in the butt when the actual radio is deeded to the group.
-*   `Radio Control config` is the configuration file for Time of Purr Cafe.
+*   `Radio Control config` is a sample configuration file. This is not the one used at Time of Purr Cafe.
 *   `reset-parcel-music.ls` waits for the parcel to be empty, then sends
     a reset message for the radio.
 
