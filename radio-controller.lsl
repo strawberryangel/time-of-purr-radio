@@ -555,7 +555,9 @@ integer process_line(string dataline)
 
         if (check_url(url))
         {
-            if (llListFindList(station_url,(list)url) == -1 || llListFindList(station_category,(list)category) == -1)
+            // The rest of the code makes the assumption that the station name is unique.
+            // Enforce that here.
+            if (llListFindList(station_name,(list)name))
             {
                 num_stations++;
 
@@ -577,7 +579,9 @@ integer process_line(string dataline)
             }
             else
             {
-                llSay(0,"This station is already entered under the same genre and same url and is skipped.\nStation: " + name + "\nGenre: '" + category + "'\nURL: " + url);
+                llSay(0,"This station is already entered under the same name. " +
+                    "Skipping.\nStation: " + name + "\nGenre: " + category +
+                    "\nURL: " + url);
                 return TRUE;
             }
         }
