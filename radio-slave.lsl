@@ -9,7 +9,8 @@ integer listen_handle;
 default {
     listen(integer channel, string name, key id, string message)
     {
-        if(llStringLength(message) > 0) {
+        string url = llGetParcelMusicURL();
+        if(llStringLength(message) > 0 && message != url) {
             llSetParcelMusicURL(message);
             llSay(0, "Changing stream to " + message);
         }
