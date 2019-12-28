@@ -10,6 +10,23 @@
 //
 // Altered for use at Time of Purr Cafe by mommypickles, with bug fixes.
 //
+// !! NOTE !! Because this received the entire configuration file at once,
+// there is danger of exceeding script memory.
+//
+// !! REQUIRED !! 
+// This is required to compile.
+// This is the URL to get the plain text version of the radio configuration.
+// 
+// #define HTTP_CONFIG_URL "https://..."
+//
+// For typical use, all radios on a sim should have the same values for the following:
+//
+// #define QUIET
+// #define RADIO_SYNC_CHANNEL ...
+// #define RADIO_SLAVE_CHANNEL ...
+// #define RADIO_RESET_CHANNEL ...
+// #define RADIO_REBOOT_CHANNEL ...
+//
 // Purpose:
 // * Sets the parcel audio URL and displays the channel info
 // * Uses Xytext to display the info.
@@ -69,15 +86,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// This script requires HTTP_CONFIG_URL to point to the configuration file.
+// For example, 
+// #define HTTP_CONFIG_URL "https://raw.githubusercontent.com/strawberryangel/sl-radio/master/Radio%20Control%20config"
+
 #define INFO_NOTECARD "Radio Control info"
-#ifndef CONFIG_NOTECARD
-#define CONFIG_NOTECARD "Radio Control config"
-#endif
 #define COMMENT_CHAR "#"
 #define SEP_CHAR_LIST ["|"]
-
-// not used currently - for showing info on current song title elsewhere in the region
-// integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
 
 // Buttons
 
@@ -115,7 +130,7 @@ string last_title_info="";
 #define DEFAULT_RADIO_STATUS RADIO_ON
 integer radio_status=DEFAULT_RADIO_STATUS;    // 0 - OFF   1 - ON
 string parcel_url="";
-integer lineno=0;
+integer lineno=1;
 key reqid=NULL_KEY;
 key httpreq_id=NULL_KEY;
 integer config_error=FALSE;
@@ -172,7 +187,8 @@ clear_display()
 
 say(string message)
 {
-    llOwnerSay(message);
+    // llOwnerSay(message);
+    llSay(0, message);
 }
 
 // Make a menu / dialog
@@ -725,7 +741,6 @@ default
     state_entry()
     {
         flag=FALSE;
-        lineno=0;
         config_error=FALSE;
         num_stations=0;
         num_categories=0;
@@ -736,58 +751,60 @@ default
         default_station_name = "";
         default_station_category = "";
 
-        if (llGetInventoryType(CONFIG_NOTECARD) == INVENTORY_NOTECARD)
-        {
-           reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
-           #ifndef QUIET
-           say("Reading config notecard...");
-           #endif
-           display_line("1","Reading configuration.");
-           display_line("2","Wait....");
-           display_line("3","");
-        }
-        else
-        {
+        httpreq_id = llHTTPRequest(HTTP_CONFIG_URL, [HTTP_METHOD, "GET", HTTP_BODY_MAXLENGTH, 16384], "");
+
+        #ifndef QUIET
+        say("Reading config notecard...");
+        #endif
+        display_line("1","Reading configuration.");
+        display_line("2","Wait....");
+        display_line("3","");
+    }
+
+    http_response( key request_id, integer status, list metadata, string body )
+    {
+        if(status != 200) {
             display_line("1","Configuration FAILED.");
-            display_line("2","No notecard found.");
-            display_line("3","Load a notecard named '" +  CONFIG_NOTECARD + "'.");
+            display_line("2","HTTP status " + string(status) + " " + body);
+            display_line("3","");
             state offline;
         }
+
+        list lines = llParseString2List(body, ["\n"], []);
+        integer count = llGetListLength(lines);
+
+        // 1-based lineno for display.
+        integer lineno = 1;
+        while(lineno <= count) {
+            string data = llList2String(lines, lineno - 1);
+            display_line("3","Line " + string(lineno) + " of " + string(count));
+            if (process_line(data))
+                ;
+            else if (config_error)
+            {
+                display_line("1","Configuration FAILED.");
+                display_line("2","Errors in notecard.");
+                display_line("3","Load a corrected notecard.");
+                state offline;
+            }
+
+            lineno++;
+        }
+
+        // Finalization
+        skip_empty_categories();
+        #ifndef QUIET
+        say("Configuration ok.\n" + (string)num_categories + " genres and " + (string)num_stations + " stations.");
+        #endif
+        display_line("1","Configuration OK");
+        display_line("2","Genres  : " + (string)num_categories);
+        display_line("3","Stations: " + (string)num_stations);
+        state menu;
     }
 
     on_rez(integer param)
     {
         llResetScript();
-    }
-
-    dataserver(key id, string data)
-    {
-        if (reqid==id)
-        {
-            if (data==EOF)
-            {
-                skip_empty_categories();
-                #ifndef QUIET
-                say("Configuration ok.\n" + (string)num_categories + " genres and " + (string)num_stations + " stations.");
-                #endif
-                display_line("1","Configuration OK");
-                display_line("2","Genres  : " + (string)num_categories);
-                display_line("3","Stations: " + (string)num_stations);
-                state menu;
-            }
-            else
-            {
-                if (process_line(data))
-                    reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
-                else if (config_error)
-                {
-                    display_line("1","Configuration FAILED.");
-                    display_line("2","Errors in notecard.");
-                    display_line("3","Load a corrected notecard.");
-                    state offline;
-                }
-            }
-        }
     }
 
     changed(integer ch)
@@ -805,7 +822,7 @@ state offline
 {
     state_entry()
     {
-        say("Reset on owner touch or when notecard updated.");
+        say("Reset on owner touch.");
     }
 
     touch_start(integer t)
@@ -832,6 +849,9 @@ state menu
         menu_type=MENU_TYPE_MAIN;
         menu_num=MENU_NUM_FIRST;
         llListenRemove(listen_handle);
+        #ifdef RADIO_REBOOT_CHANNEL
+        llListen(RADIO_REBOOT_CHANNEL,"",NULL_KEY,"");
+        #endif
         #ifdef RADIO_RESET_CHANNEL
         llListen(RADIO_RESET_CHANNEL,"",NULL_KEY,"");
         #endif
@@ -859,6 +879,16 @@ state menu
 
     listen(integer chan, string name,key id,string msg)
     {
+        #ifdef RADIO_REBOOT_CHANNEL
+        // This allows us to reload 
+        // all of the radios on the sim a once.
+        if(chan == RADIO_REBOOT_CHANNEL)
+        {
+            llResetScript();
+            return;
+        }
+        #endif
+
         #ifdef RADIO_RESET_CHANNEL
         // When the radio is reset automatically,
         // this message is sent.
