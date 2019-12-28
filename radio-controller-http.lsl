@@ -75,8 +75,6 @@
 #endif
 #define COMMENT_CHAR "#"
 #define SEP_CHAR_LIST ["|"]
-#define UPDATE_TIME 5.0
-#define NO_TITLE_INFO "(no title info available)"
 
 // not used currently - for showing info on current song title elsewhere in the region
 // integer broadcast_channel=-1234;                        ///////    EDITABLE  \\\\\\
@@ -153,15 +151,7 @@ string text1 = "";
 string text2 = "";
 string text3 = "";
 
-// Make request for title info using HTTP request
-retrieve_titelinfo()
-{
-    string url=llList2String(station_url,station_index);
-    httpreq_id=llHTTPRequest(url + "/7.html",[HTTP_USER_AGENT,"Mozilla"],"");
-}
-
-// Display a line on an Xytext device linked in
-// Hover text is being used right now.
+// Display hover text lines.
 display_line(string line, string message)
 {
     if(line == "1") text1 = message;
@@ -172,10 +162,9 @@ display_line(string line, string message)
     llSetText(hovertext, <0.7, 0.7, 0.7>, 1.0);
 }
 
-// Clear the Xytext display
+// Clear the display
 clear_display()
 {
-    // Clears the display
     display_line("1","Radio Station ID");
     display_line("2","Music Genre....");
     display_line("3","Now Playing....");
@@ -594,7 +583,6 @@ set_parcel_url(string url)
         display_line("1","Now playing.....");
         display_line("2","Station: " + llList2String(station_desc,station_index));
         display_line("3","Genre  : " + llList2String(category_list,category_index));
-        llSetTimerEvent(UPDATE_TIME);
     }
 }
 
@@ -920,7 +908,6 @@ state menu
             {
                 radio_status=RADIO_OFF;
                 set_parcel_url("");
-                llSetTimerEvent(0.0);
                 #ifndef QUIET
                 llSay(0,"Radio now turned off.");
                 #endif
@@ -971,46 +958,6 @@ state menu
                 #ifdef RADIO_SYNC_CHANNEL
                 broadcast_station_change(msg);
                 #endif
-            }
-        }
-    }
-
-    timer()
-    {
-        // SJ: We have no title information to retrived.
-        // retrieve_titelinfo();
-        // llSetTimerEvent(UPDATE_TIME);
-    }
-
-    http_response(key id, integer status, list meta, string body)
-    {
-        if (id == httpreq_id)
-        {
-            if (status == 200)
-            {
-                string feed = llGetSubString(body,llSubStringIndex(body, "<body>") + llStringLength("<body>"), llSubStringIndex(body,"</body>") - 1);
-                list feed_list = llParseString2List(feed,[","],[]);
-                string current_title_info= llList2String(feed_list,6);
-                integer length = llGetListLength(feed_list);
-
-                if(llList2String(feed_list,7))
-                {
-                    integer a = 7;
-                    for(; a<length; ++a)
-                    {
-                        current_title_info += ", " + llList2String(feed_list,a);
-                    }
-                }
-
-                if (current_title_info != last_title_info)
-                {
-                    last_title_info = current_title_info;
-                    display_line("3","Title  : " + current_title_info);
-                }
-            }
-            else
-            {
-                display_line("3","Title  : " + NO_TITLE_INFO);
             }
         }
     }
