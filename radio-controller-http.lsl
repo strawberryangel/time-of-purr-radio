@@ -170,6 +170,11 @@ clear_display()
     display_line("3","Now Playing....");
 }
 
+say(string message)
+{
+    llOwnerSay(message);
+}
+
 // Make a menu / dialog
 make_menu(key id)
 {
@@ -215,7 +220,7 @@ list category_menu(integer num)
 
         if (num > last_sub)
         {
-            llSay(0,"error: wrong submenu number: " + (string) num + ".");
+            say("error: wrong submenu number: " + (string) num + ".");
             return [ BUTTON_MAIN ];
         }
         else
@@ -303,7 +308,7 @@ list station_menu(integer num)
 
         if (num >= last_sub)
         {
-            llSay(0,"error: wrong submenu number: " + (string) num + ".");
+            say("error: wrong submenu number: " + (string) num + ".");
             return [ "MAIN" ];
         }
         else
@@ -429,14 +434,14 @@ integer process_line(string dataline)
     }
     else if (llGetSubString(line,0,0) == "[" && llGetSubString(line,-1,-1) == "]")
     {
-        llSay(0,"error: malformed section found at line " + (string)lineno + ".\n" + dataline);
+        say("error: malformed section found at line " + (string)lineno + ".\n" + dataline);
         config_error=TRUE;
         return FALSE;
     }
 
     if (section == 0)
     {
-        llSay(0,"error: no section found on line: " + (string) lineno);
+        say("error: no section found on line: " + (string) lineno);
         config_error = TRUE;
         return FALSE;
     }
@@ -466,7 +471,7 @@ integer process_line(string dataline)
         }
         else
         {
-            llSay(0,"error: invalid option on line: " + (string)lineno + ".\n" + dataline);
+            say("error: invalid option on line: " + (string)lineno + ".\n" + dataline);
             config_error=TRUE;
             return FALSE;
         }
@@ -494,7 +499,7 @@ integer process_line(string dataline)
             // category_list += field;
         }
         else
-            llSay(0,"genre: '" + field + "' already entered; double entry skipped.");
+            say("genre: '" + field + "' already entered; double entry skipped.");
 
         return TRUE;
     }
@@ -510,7 +515,7 @@ integer process_line(string dataline)
 
         if (!available_category(category))
         {
-            llSay(0,"error: unknown genre on line: " + (string)lineno + ".\n" + dataline);
+            say("error: unknown genre on line: " + (string)lineno + ".\n" + dataline);
             config_error=TRUE;
             return FALSE;
         }
@@ -539,7 +544,7 @@ integer process_line(string dataline)
             }
             else
             {
-                llSay(0,"This station is already entered under the same name. " +
+                say("This station is already entered under the same name. " +
                     "Skipping.\nStation: " + name + "\nGenre: " + category +
                     "\nURL: " + url);
                 return TRUE;
@@ -547,7 +552,7 @@ integer process_line(string dataline)
         }
         else
         {
-            llSay(0,"error: malformed url on line: " + (string)lineno + ".\n" + dataline);
+            say("error: malformed url on line: " + (string)lineno + ".\n" + dataline);
             config_error=TRUE;
             return FALSE;
         }
@@ -578,7 +583,7 @@ set_parcel_url(string url)
     else
     {
         #ifndef QUIET
-        llSay(0,"The station is now set to " + llList2String(station_desc,station_index) + ".");
+        say("The station is now set to " + llList2String(station_desc,station_index) + ".");
         #endif
         display_line("1","Now playing.....");
         display_line("2","Station: " + llList2String(station_desc,station_index));
@@ -621,7 +626,7 @@ skip_empty_categories()
     {
         if (empty_category(llList2String(category_list,i)))
         {
-            llSay(0,"Warning: Genre '" + llList2String(category_list,i) + "' contains no stations and is deleted.");
+            say("Warning: Genre '" + llList2String(category_list,i) + "' contains no stations and is deleted.");
             category_list=llDeleteSubList(category_list,i,i);
         }
         else
@@ -646,14 +651,14 @@ integer set_genre_by_name(string msg)
 
     if (index == -1)
     {
-        llSay(0,"error: genre not found: " + msg);
+        say("error: genre not found: " + msg);
         return FALSE;
     }
     else
     {
         category_index=index;
         #ifndef QUIET
-        llSay(0,"Genre is now set to " + llList2String(category_list,category_index) + ".");
+        say("Genre is now set to " + llList2String(category_list,category_index) + ".");
         #endif
         return TRUE;
     }
@@ -664,7 +669,7 @@ set_station_by_name(string msg)
     integer index = llListFindList(station_name, (list)msg);
 
     if (index == -1)
-        llSay(0,"error: station not found: " + msg);
+        say("error: station not found: " + msg);
     else
     {
         station_index=index;
@@ -735,7 +740,7 @@ default
         {
            reqid=llGetNotecardLine(CONFIG_NOTECARD,lineno++);
            #ifndef QUIET
-           llSay(0, "Reading config notecard...");
+           say("Reading config notecard...");
            #endif
            display_line("1","Reading configuration.");
            display_line("2","Wait....");
@@ -763,7 +768,7 @@ default
             {
                 skip_empty_categories();
                 #ifndef QUIET
-                llSay(0,"Configuration ok.\n" + (string)num_categories + " genres and " + (string)num_stations + " stations.");
+                say("Configuration ok.\n" + (string)num_categories + " genres and " + (string)num_stations + " stations.");
                 #endif
                 display_line("1","Configuration OK");
                 display_line("2","Genres  : " + (string)num_categories);
@@ -800,7 +805,7 @@ state offline
 {
     state_entry()
     {
-        llSay(0,"Reset on owner touch or when notecard updated.");
+        say("Reset on owner touch or when notecard updated.");
     }
 
     touch_start(integer t)
@@ -849,7 +854,7 @@ state menu
             make_menu(toucher);
         }
         else
-            llSay(0,"Sorry, you have no access.");
+            say("Sorry, you have no access.");
     }
 
     listen(integer chan, string name,key id,string msg)
@@ -900,7 +905,7 @@ state menu
                 display_line("1","Radio is ON");
                 menu_num=MENU_NUM_FIRST;
                 #ifndef QUIET
-                llSay(0,"Radio now turned on.");
+                say("Radio now turned on.");
                 #endif
                 make_menu(id);
             }
@@ -909,7 +914,7 @@ state menu
                 radio_status=RADIO_OFF;
                 set_parcel_url("");
                 #ifndef QUIET
-                llSay(0,"Radio now turned off.");
+                say("Radio now turned off.");
                 #endif
             }
             else if (msg == BUTTON_HELP)
@@ -919,7 +924,7 @@ state menu
                     llGiveInventory(id,INFO_NOTECARD);
                 }
                 else
-                    llSay(0,"Sorry, help is not available.");
+                    say("Sorry, help is not available.");
             }
             else if (radio_status == RADIO_ON)
             {
