@@ -102,6 +102,10 @@
 #define BUTTON_PREV "<<"
 #define BUTTON_ON   "ON"
 #define BUTTON_OFF  "OFF"
+#define BUTTON_BLANK "-"
+
+// The number of buttons per menu.
+#define MAX_BUTTONS 9
 
 //////////////////////////////////
 // Don't touch the variables below
@@ -121,9 +125,6 @@ list station_url=[];
 // Default station information.
 string default_station_name = "";
 string default_station_category = "";
-
-// Last song title played
-string last_title_info="";
 
 #define RADIO_ON 1
 #define RADIO_OFF 0
@@ -154,8 +155,10 @@ integer listen_handle;
 integer menu_type=MENU_TYPE_MAIN; // 0 - Main menu (genres)   1 - Station menu (stations)
 integer menu_num=MENU_NUM_FIRST;          // When more menu options need to be selectable then can be displayed on a menu (12), this is the menu number - menu number 0 is the first menu.
 
+
 // Genres and stations
 
+#define current_genre() llList2String(category_list,category_index)
 integer category_index=0;    // Current index in category_list  (genre)
 integer station_index=0;     // Current index in station_*      (station)
 
@@ -191,6 +194,11 @@ say(string message)
     llSay(0, message);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// MENU FUNCTIONS
+//
+
 // Make a menu / dialog
 make_menu(key id)
 {
@@ -212,7 +220,7 @@ make_menu(key id)
         {
             llDialog(id,
                 "Menu: Stations\nGenre:" +
-                llList2String(category_list,category_index) +
+                current_genre() +
                 "\n\nChoose MAIN to choose another genre.",
                 station_menu(menu_num),
                 menu_channel
@@ -224,53 +232,59 @@ make_menu(key id)
     listen_handle=llListen(menu_channel,"",id,"");
 }
 
-// Make the menu option list for menu: catagories (genres)
-list category_menu(integer num)
+list build_menu(integer page,list values, string up)
 {
-    integer len=llGetListLength(category_list);
-    list menu=[];
+    // Constrain pages
+    integer len = llGetListLength(values);
+    integer page_count = (len - 1) / MAX_BUTTONS + 1;
+    page = (page + page_count) % page_count;
+    integer low_index = MAX_BUTTONS * page;
+    integer high_index = low_index + MAX_BUTTONS - 1;
+    if(high_index >= len) high_index = len - 1;
 
-    if (len > 9)   // If more then 9 items (12 minus the 3 buttons for MAIN/HELP and PREV, NEXT)
-    {
-        integer last_sub=(len-1)/9;   // submenus start at 0. 9th entry is in submenu 0, 10th in 1, etc.
-
-        if (num > last_sub)
-        {
-            say("error: wrong submenu number: " + (string) num + ".");
-            return [ BUTTON_MAIN ];
-        }
-        else
-        {
-             integer first=9*num;
-
-             while (--len >= first)
-                menu += llList2String(category_list,len);
-
-             if (num == 0)
-                ; // menu += BUTTON_HELP;
-             else
-                 menu += BUTTON_MAIN;
-
-             if (num == 0)
-                ; // menu += BUTTON_OFF;
-             else
-                menu += BUTTON_PREV;
-
-             if (num != last_sub)
-                menu += BUTTON_NEXT;
-        }
+    // Navigation buttons
+    string prev = BUTTON_BLANK;
+    string next = BUTTON_BLANK;
+    if(page_count > 1) {
+        prev = BUTTON_PREV;
+        next = BUTTON_NEXT;
     }
-    else
-    {
-        while (--len >= 0)
-            menu += llList2String(category_list,len);
+    // Debug messages
+    // llOwnerSay("values " + llList2CSV(values));
+    // llOwnerSay("len " + string(len));
+    // llOwnerSay("page_count " + string(page_count));
+    // llOwnerSay("page " + string(page));
+    // llOwnerSay("low_index " + string(low_index));
+    // llOwnerSay("high_index " + string(high_index));
 
-        // menu += BUTTON_OFF;
-        // menu += BUTTON_HELP;
+    // Content buttons
+    list menu = [];
+
+    string item;
+    integer i = low_index;
+    while(i <= high_index) {
+        item = llList2String(values, i);
+        menu += item;
+        // Debug message
+        // llOwnerSay("Item " + item + " = "  + llList2CSV(menu));
+        i++;
+    }
+
+    while(llGetListLength(menu) % 3 != 0) menu += BUTTON_BLANK;
+
+    if(up != BUTTON_BLANK || page_count > 1) {
+        menu += [prev, up, next];
+        // Debug message
+        // llOwnerSay("Added navigation buttons " + llList2CSV(menu));
     }
 
     return order_buttons(menu);
-    // return menu;
+ }
+
+// Make the menu option list for menu: catagories (genres)
+list category_menu(integer num)
+{
+    return build_menu(num, category_list, BUTTON_BLANK);
 }
 
 // Returns the number of stations in a certain category
@@ -301,7 +315,7 @@ list station_list(integer category)
 {
     list s=[];
     integer i;
-    string cname=llList2String(category_list,category_index);
+    string cname=current_genre();
 
     for (i = 0; i < llGetListLength(station_name); i++)
         if (llList2String(station_category,i) == cname)
@@ -315,49 +329,13 @@ list station_list(integer category)
 list station_menu(integer num)
 {
     list stations=station_list(category_index);
-    integer len=llGetListLength(stations);
-    list menu=[];
-
-    if (len > 11)       // 12 - 1 for MAIN menu
-    {
-        integer last_sub=(len-1)/9;
-
-        if (num >= last_sub)
-        {
-            say("error: wrong submenu number: " + (string) num + ".");
-            return [ "MAIN" ];
-        }
-        else
-        {
-             integer first=9*num;
-             integer last=9*num+8;
-
-             menu += BUTTON_MAIN;
-
-             if (num > 0)
-                menu += BUTTON_PREV;
-
-             if (num < last_sub)
-                menu += BUTTON_NEXT;
-
-            if (len > last)
-                len =last;
-
-            while (--len >= first)
-                menu += llList2String(stations,len);
-        }
-    }
-    else
-    {
-        menu += BUTTON_MAIN;
-
-        while (--len >= 0)
-            menu += llList2String(stations,len);
-    }
-
-    return order_buttons(menu);
-    // return menu;
+    return build_menu(num, stations, BUTTON_MAIN);
 }
+
+//
+// MENU FUNCTIONS
+//
+////////////////////////////////////////////////////////////////////////////////
 
 // Returns whether av with key id has access
 integer has_access(key id)
@@ -509,10 +487,7 @@ integer process_line(string dataline)
     {
         if (llListFindList(category_list,(list)field) == -1)
         {
-            // += was putting the list in reverse order.
-            // The order should be the same as the notecard now.
-            category_list = field + category_list;
-            // category_list += field;
+            category_list += field;
         }
         else
             say("genre: '" + field + "' already entered; double entry skipped.");
@@ -544,12 +519,10 @@ integer process_line(string dataline)
             {
                 num_stations++;
 
-                // += was putting the lists in reverse order.
-                // The order should be the same as the notecard now.
-                station_category = category + station_category;
-                station_name = name + station_name;
-                station_desc = desc + station_desc;
-                station_url = url + station_url;
+                station_category += category;
+                station_name += name;
+                station_desc += desc;
+                station_url += url;
 
                 // Is this the default station?
                 if(default_station == "*") {
@@ -603,7 +576,7 @@ set_parcel_url(string url)
         #endif
         display_line("1","Now playing.....");
         display_line("2","Station: " + llList2String(station_desc,station_index));
-        display_line("3","Genre  : " + llList2String(category_list,category_index));
+        display_line("3","Genre  : " + current_genre());
     }
 }
 
@@ -674,7 +647,7 @@ integer set_genre_by_name(string msg)
     {
         category_index=index;
         #ifndef QUIET
-        say("Genre is now set to " + llList2String(category_list,category_index) + ".");
+        say("Genre is now set to " + current_genre() + ".");
         #endif
         return TRUE;
     }
@@ -879,6 +852,8 @@ state menu
 
     listen(integer chan, string name,key id,string msg)
     {
+        if(msg == BUTTON_BLANK) return;
+
         #ifdef RADIO_REBOOT_CHANNEL
         // This allows us to reload 
         // all of the radios on the sim a once.
